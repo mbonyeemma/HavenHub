@@ -11,12 +11,14 @@ function applyJWTConditionally(req: Request, res: Response, next: NextFunction):
 }
 
 // Routes
+router.get('/', applyJWTConditionally, getAllProperties);
 router.post('/addProperty', applyJWTConditionally, addProperty);
-router.get('/properties', applyJWTConditionally, getAllProperties);
 router.get('/properties/:id', applyJWTConditionally, getPropertyById);
 router.put('/properties/:id', applyJWTConditionally, updateProperty);
 router.delete('/properties/:id', applyJWTConditionally, deleteProperty);
-
+router.get('/units/:id', applyJWTConditionally, getAllUnits);
+router.post('/addUnit', applyJWTConditionally, addUnit);
+router.delete('/units/:id', applyJWTConditionally, deleteUnit);
 /**
  * Add a new property
  */
@@ -26,6 +28,15 @@ async function addProperty(req: Request, res: Response): Promise<void> {
     res.status(result.status).json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error adding property', error });
+  }
+}
+
+async function addUnit(req: Request, res: Response): Promise<void> {
+  try {
+    const result = await admin.addUnit(req.body);
+    res.status(result.status).json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error adding units', error });
   }
 }
 
@@ -41,11 +52,21 @@ async function getAllProperties(req: Request, res: Response): Promise<void> {
   }
 }
 
+async function getAllUnits(req: Request, res: Response): Promise<void> {
+  try {
+    const propertyId = parseInt(req.params.id, 10);
+    const result = await admin.getUnitsByPropertyId(`${propertyId}`);
+    res.status(result.status).json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching properties', error });
+  }
+}
+
 
 async function getPropertyById(req: Request, res: Response): Promise<void> {
   try {
     const propertyId = parseInt(req.params.id, 10);
-    const result = await admin.getPropertyById(propertyId);
+    const result = await admin.getPropertyById(`${propertyId}`);
     res.status(result.status).json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching property', error });
@@ -68,6 +89,16 @@ async function deleteProperty(req: Request, res: Response): Promise<void> {
   try {
     const propertyId = parseInt(req.params.id, 10);
     const result = await admin.deleteProperty(propertyId);
+    res.status(result.status).json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting property', error });
+  }
+}
+
+async function deleteUnit(req: Request, res: Response): Promise<void> {
+  try {
+    const propertyId = parseInt(req.params.id, 10);
+    const result = await admin.deleteUnit(propertyId);
     res.status(result.status).json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error deleting property', error });

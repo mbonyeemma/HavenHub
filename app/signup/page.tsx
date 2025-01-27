@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { post } from '@/services/api'
 
 export default function SignUp() {
   const [email, setEmail] = useState('')
@@ -19,7 +20,22 @@ export default function SignUp() {
     // Here you would typically send a request to your backend API
     // For now, we'll just simulate a successful sign up
     console.log('Sign up with:', { email, password })
-    router.push('/dashboard')
+
+    try {
+
+      const response = await post('/auth/signup', { email, password })
+      console.log(":: response ::", response)
+      if (response.status === 200) {
+        localStorage.setItem('jwt', response.data.token)
+        router.push('/dashboard')
+        return response.data
+      } else {
+        throw new Error('Signup failed')
+      }
+    } catch (error) {
+      console.error('Error Signing in:', error)
+      throw error
+    }
   }
 
   return (

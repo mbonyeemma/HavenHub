@@ -29,19 +29,19 @@ class DbHelper {
     if (connectionType === 'write') {
       return mysql.createPool({
         connectionLimit: 1,
-        host: process.env.WRITE_NAME,
-        database: process.env.WRITE_DBNAME,
-        user: process.env.WRITE_USER_NAME,
-        password: process.env.WRITE_PASSWORD,
+        host: process.env.HOST_NAME,
+        database: process.env.DBNAME,
+        user: process.env.USER_NAME,
+        password: process.env.PASSWORD,
       });
     }
     if (connectionType === 'read') {
       return mysql.createPool({
         connectionLimit: 1,
-        host: process.env.READ_HOST_NAME,
-        database: process.env.READ_DBNAME,
-        user: process.env.READ_USER_NAME,
-        password: process.env.READ_PASSWORD,
+        host: process.env.HOST_NAME,
+        database: process.env.DBNAME,
+        user: process.env.USER_NAME,
+        password: process.env.PASSWORD,
       });
     }
   }

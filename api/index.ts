@@ -6,6 +6,8 @@ import expressFileUpload from 'express-fileupload';
 
 import users from './controllers/accounts';
 import admin from './controllers/admin';
+import properties from './controllers/properties';
+import tenants from './controllers/tenant';
 
 dotenv.config();
 
@@ -19,6 +21,8 @@ app.use(bodyParser.json());
 
 // Routes
 app.use('/api/auth', users);
+app.use('/api/properties', properties);
+app.use('/api/tenants', tenants);
 app.use('/admin', admin);
 
 // Handle 404

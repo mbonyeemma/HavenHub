@@ -30,9 +30,9 @@ class Tenant extends Model {
   /**
    * Get a tenant by ID
    */
-  async getTenantById(id: number): Promise<any> {
+  async getTenantById(id: string): Promise<any> {
     try {
-      const tenant = await this.selectDataById('tenants', id);
+      const tenant = await this.selectData('tenants', `id=${id}`);
       return tenant;
     } catch (error) {
       console.error('Error fetching tenant by ID:', error);
@@ -45,7 +45,7 @@ class Tenant extends Model {
    */
   async updateTenant(id: number, data: any): Promise<any> {
     try {
-      const result = await this.updateData('tenants', id, data);
+      const result = await this.updateData('tenants', `id=${id}`, data);
       return result;
     } catch (error) {
       console.error('Error updating tenant:', error);
@@ -58,7 +58,7 @@ class Tenant extends Model {
    */
   async deleteTenant(id: number): Promise<any> {
     try {
-      const result = await this.deleteData('tenants', id);
+      const result = await this.deleteData('tenants', `id=${id}`);
       return result;
     } catch (error) {
       console.error('Error deleting tenant:', error);

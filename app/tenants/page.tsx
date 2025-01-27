@@ -24,6 +24,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Plus } from 'lucide-react'
+import { get, post, put, del } from '@/services/api'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface Tenant {
   id: number;
@@ -34,8 +36,28 @@ interface Tenant {
   unit: string;
 }
 
+interface Property {
+  id: number;
+  name: string;
+  district: string;
+  address: string;
+  type: 'residential' | 'commercial';
+  hasUnits: boolean;
+  rentalAmount?: number;
+  rentalPeriod?: string;
+}
+
+interface Unit {
+  property_id: number;
+  name: string;
+  price: string;
+  period: string;
+}
+
 export default function Tenants() {
   const [tenants, setTenants] = useState<Tenant[]>([])
+  const [properties, setProperties] = useState<Unit[]>([])
+  const [units, setUnits] = useState<Property[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [newTenant, setNewTenant] = useState<Omit<Tenant, 'id'>>({
     name: '',
@@ -45,42 +67,54 @@ export default function Tenants() {
     unit: ''
   })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchTenants()
+    fetchProperties()
+    fetchUnits()
   }, [])
 
   const fetchTenants = async () => {
-    setIsLoading(true)
     try {
-      const response = await fetch('/api/tenants')
-      if (!response.ok) {
-        throw new Error('Failed to fetch tenants')
-      }
-      const data = await response.json()
-      setTenants(data)
+      const response = await get('/tenants')
+      setTenants(response.data)
+
     } catch (err) {
-      setError('Error fetching tenants. Please try again later.')
+      console.log('Error fetching tenants. Please try again later.')
     } finally {
-      setIsLoading(false)
+    }
+  }
+
+  const fetchProperties = async () => {
+    //setIsLoading(true)
+    try {
+      const response = await get('/properties')
+      setProperties(response.data)
+    } catch (error) {
+      console.error('Error fetching properties:', error)
+    } finally {
+      //setIsLoading(false)
+    }
+  }
+
+  const fetchUnits = async (id: string) => {
+    try {
+      const response = await get(`/properties/units/${id}`)
+      setUnits(response.data)
+    } catch (error) {
+      console.error('Error fetching units:', error)
+    } finally {
+
     }
   }
 
   const handleAddTenant = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const response = await fetch('/api/tenants', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newTenant),
-      })
-      if (!response.ok) {
-        throw new Error('Failed to add tenant')
-      }
+      
+      await post('/tenants/addTenants', newTenant)
       setIsDialogOpen(false)
       setNewTenant({
         name: '',
@@ -169,26 +203,47 @@ export default function Tenants() {
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="property" className="text-right">
+                      <Label htmlFor="type" className="text-right">
                         Property
                       </Label>
-                      <Input
-                        id="property"
+                      <Select
                         value={newTenant.property}
-                        onChange={(e) => setNewTenant({...newTenant, property: e.target.value})}
-                        className="col-span-3"
-                      />
+                        onValueChange={(value) => {
+                          setNewTenant({...newTenant, property: value})
+                          fetchUnits(value)
+                        }}
+                      >
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {
+                            properties.map((property) => (
+                              <SelectItem value={String(property.id)}>{property.name}</SelectItem>
+                            ))
+                          }
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="unit" className="text-right">
+                      <Label htmlFor="type" className="text-right">
                         Unit
                       </Label>
-                      <Input
-                        id="unit"
+                      <Select
                         value={newTenant.unit}
-                        onChange={(e) => setNewTenant({...newTenant, unit: e.target.value})}
-                        className="col-span-3"
-                      />
+                        onValueChange={(value) => setNewTenant({...newTenant, unit: value})}
+                      >
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {
+                            units.map((unit) => (
+                              <SelectItem value={String(unit.id)}>{unit.name}</SelectItem>
+                            ))
+                          }
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <DialogFooter>

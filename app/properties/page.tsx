@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Home, Plus } from 'lucide-react'
+import { Home, Plus, Bell } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { get, post, put, del } from '@/services/api'
 
@@ -61,8 +61,8 @@ export default function Properties() {
   const fetchProperties = async () => {
     //setIsLoading(true)
     try {
-      const data = await get('/properties')
-      setProperties(data)
+      const response = await get('/properties')
+      setProperties(response.data)
     } catch (error) {
       console.error('Error fetching properties:', error)
       //setError('Error fetching properties. Please try again later.')
@@ -73,8 +73,9 @@ export default function Properties() {
 
   const handleAddProperty = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log(":: newProperty ::", newProperty)
     try {
-      await post('/properties', newProperty)
+      await post('/properties/addProperty', newProperty)
       setIsPropertyDialogOpen(false)
       setNewProperty({
         name: '',
@@ -94,7 +95,7 @@ export default function Properties() {
 
   const handleDeleteProperty = async (id: number) => {
     try {
-      await del(`/properties/${id}`)
+      await del(`/properties/properties/${id}`)
       fetchProperties()
     } catch (error) {
       console.error('Error deleting property:', error)
@@ -118,7 +119,38 @@ export default function Properties() {
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white shadow-sm">
-        {/* Navigation content (unchanged) */}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 justify-between">
+            <div className="flex">
+              <div className="flex flex-shrink-0 items-center">
+                <span className="text-2xl font-bold text-gray-800">Bava Rentals</span>
+              </div>
+              <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
+                <Link href="/dashboard" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Dashboard
+                </Link>
+                <Link href="/properties" className="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Properties
+                </Link>
+                <Link href="/tenants" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Tenants
+                </Link>
+                <Link href="/payments" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Payments
+                </Link>
+                <Link href="/reports" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Reports
+                </Link>
+              </div>
+            </div>
+            <div className="hidden sm:ml-6 sm:flex sm:items-center">
+              <Button variant="ghost">
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">View notifications</span>
+              </Button>
+            </div>
+          </div>
+        </div>
       </nav>
 
       <main className="py-10">
@@ -297,6 +329,11 @@ export default function Properties() {
                           </Link>
                         </Button>
                         <Button onClick={() => handleDeleteProperty(property.id)} variant="destructive" size="sm" >Delete</Button>
+                        {property.has_units === 1 && (<Button variant="outline" size="sm">
+                          <Link href={`/units/${property.id}`}>
+                            View Units
+                          </Link>
+                        </Button>)}
                       </TableCell>
                     </TableRow>
                   ))}

@@ -11,8 +11,8 @@ function applyJWTConditionally(req: Request, res: Response, next: NextFunction):
 }
 
 // Routes
-router.post('/tenants', applyJWTConditionally, addTenant);
-router.get('/tenants', applyJWTConditionally, getAllTenants);
+router.get('/', applyJWTConditionally, getAllTenants);
+router.post('/addTenants', applyJWTConditionally, addTenant);
 router.get('/tenants/:id', applyJWTConditionally, getTenantById);
 router.put('/tenants/:id', applyJWTConditionally, updateTenant);
 router.delete('/tenants/:id', applyJWTConditionally, deleteTenant);
@@ -47,7 +47,7 @@ async function getAllTenants(req: Request, res: Response): Promise<void> {
 async function getTenantById(req: Request, res: Response): Promise<void> {
   try {
     const tenantId = parseInt(req.params.id, 10);
-    const tenant = await admin.selectDataById('tenants', tenantId);
+    const tenant = await admin.selectData('tenants', tenantId);
 
     if (!tenant) {
       res.status(404).json({ message: 'Tenant not found' });
@@ -66,7 +66,7 @@ async function getTenantById(req: Request, res: Response): Promise<void> {
 async function updateTenant(req: Request, res: Response): Promise<void> {
   try {
     const tenantId = parseInt(req.params.id, 10);
-    const result = await admin.updateData('tenants', tenantId, req.body);
+    const result = await admin.updateData('tenants', `id=${tenantId}`, req.body);
 
     if (!result) {
       res.status(404).json({ message: 'Tenant not found' });
@@ -85,7 +85,7 @@ async function updateTenant(req: Request, res: Response): Promise<void> {
 async function deleteTenant(req: Request, res: Response): Promise<void> {
   try {
     const tenantId = parseInt(req.params.id, 10);
-    const result = await admin.deleteData('tenants', tenantId);
+    const result = await admin.deleteData('tenants', `id=${tenantId}`);
 
     if (!result) {
       res.status(404).json({ message: 'Tenant not found' });

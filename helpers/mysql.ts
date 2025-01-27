@@ -1,5 +1,9 @@
 import mysql from 'mysql2/promise';
 
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 // Database connection configuration
 const dbConfig = {
   host: process.env.MYSQL_HOST,

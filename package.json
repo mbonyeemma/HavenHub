@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev:next\" \"npm run dev:api\"",
-    "start": "concurrently \"npm run start:next\" \"npm run start:api\"",
+    "dev": "concurrently \"yarn run dev:next\" \"yarn run dev:api\"",
+    "start": "concurrently \"yarn run start:next\" \"yarn run start:api\"",
     "dev:next": "next dev",
     "dev:api": "ts-node ./api/index.ts",
     "start:next": "next start",
@@ -81,13 +81,16 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.19.5",
     "@types/cors": "^2.8.17",
+    "@types/dotenv": "^8.2.3",
     "@types/express-fileupload": "^1.5.1",
-    "@types/node": "^22",
+    "@types/node": "^22.10.10",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

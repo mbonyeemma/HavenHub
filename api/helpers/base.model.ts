@@ -44,7 +44,7 @@ class BaseModel {
     });
   }
   public deleteData(table: string, where: string = '') {
-      const query = 'CALL deleteFile();';
+      const query = `DELETE FROM ${table} ${where ? `WHERE ${where}` : ''};`;
       const result = db.default.pdo(query);
       this.fileId = '';
       return result;

@@ -21,17 +21,15 @@ export default function Login() {
     console.log('Login with:', { email, password })
 
     try {
-      router.push('/dashboard')
-      return;
-      const response = await post('/api/login', { email, password })
+
+      const response = await post('/auth/login', { email, password })
+      console.log(":: response ::", response)
       if (response.status === 200) {
-        localStorage.setItem('jwt', response.data.token)
+        localStorage.setItem('jwt', response.data.jwt)
         router.push('/dashboard')
-        return response.data
       } else {
         throw new Error('Login failed')
       }
-      return response.data
     } catch (error) {
       console.error('Error logging in:', error)
       throw error
