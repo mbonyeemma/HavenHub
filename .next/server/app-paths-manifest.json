@@ -1,9 +1,1 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/properties/page": "app/properties/page.js",
-  "/login/page": "app/login/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/tenants/page": "app/tenants/page.js",
-  "/reports/page": "app/reports/page.js",
-  "/payments/page": "app/payments/page.js"
-}
+{}
