@@ -32,7 +32,7 @@ class Payment extends Model {
    */
   async getPaymentById(id: number): Promise<any> {
     try {
-      const payment = await this.selectDataById('payments', id);
+      const payment = await this.selectData('payments', `id=${id}`);
       return payment;
     } catch (error) {
       console.error('Error fetching payment by ID:', error);
@@ -45,7 +45,7 @@ class Payment extends Model {
    */
   async updatePayment(id: number, data: any): Promise<any> {
     try {
-      const result = await this.updateData('payments', id, data);
+      const result = await this.updateData('payments', `id=${id}`, data);
       return result;
     } catch (error) {
       console.error('Error updating payment:', error);
@@ -58,7 +58,7 @@ class Payment extends Model {
    */
   async deletePayment(id: number): Promise<any> {
     try {
-      const result = await this.deleteData('payments', id);
+      const result = await this.deleteData('payments', `id=${id}`);
       return result;
     } catch (error) {
       console.error('Error deleting payment:', error);

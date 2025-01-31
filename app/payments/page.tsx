@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,41 +23,141 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Plus, DollarSign } from 'lucide-react'
+import { Plus, DollarSign, Bell } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { get, post } from '@/services/api'
 
-// Mock data for payments
-const initialPayments = [
-  { id: 1, tenant: 'John Doe', property: 'Sunset Apartments', amount: 1200, date: '2023-05-01', status: 'Paid' },
-  { id: 2, tenant: 'Jane Smith', property: 'Downtown Lofts', amount: 1500, date: '2023-05-02', status: 'Pending' },
-  { id: 3, tenant: 'Bob Johnson', property: 'Riverside Condos', amount: 1800, date: '2023-05-03', status: 'Overdue' },
-  { id: 4, tenant: 'Alice Brown', property: 'Mountain View Homes', amount: 1000, date: '2023-05-04', status: 'Paid' },
-  { id: 5, tenant: 'Charlie Davis', property: 'Beachside Villas', amount: 2000, date: '2023-05-05', status: 'Pending' },
+
+interface Payment {
+  id: number;
+  tenant_id: string;
+  property_id: string;
+  amount: string;
+  date: string;
+  status: 'paid';
+  payment_method: string;
+}
+
+interface Tenant {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  property: string;
+  unit: string;
+}
+
+interface Property {
+  id: number;
+  name: string;
+  district: string;
+  address: string;
+  type: 'residential' | 'commercial';
+  hasUnits: boolean;
+  rentalAmount?: number;
+  rentalPeriod?: string;
+}
+
+const paymentMethod = [
+  {"key": "MM", "value": "MOBILE MONEY"},
+  {"key": "CASH", "value": "CASH"},
+  {"key": "BANK", "value": "BANK TRANSFER"}
 ]
 
+
 export default function Payments() {
-  const [payments, setPayments] = useState(initialPayments)
+  const [payments, setPayments] = useState<Payment[]>([])
+  const [tenants, setTenants] = useState<Tenant[]>([])
+  const [properties, setProperties] = useState<Property[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [newPayment, setNewPayment] = useState({ tenant: '', property: '', amount: '', date: '', status: 'Pending' })
+  const [newPayment, setNewPayment] = useState({ tenant_id: '', property_id: '', payment_method: '', amount: '', date: '', status: 'Paid' })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const filteredPayments = payments.filter(payment =>
-    payment.tenant.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.property.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.status.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  useEffect(() => {
+    fetchPayments()
+    fetchProperties()
+    fetchTenants()
+  }, [])
 
-  const handleAddPayment = (e: React.FormEvent) => {
+  const fetchPayments = async () => {
+    try {
+      const response = await get("/payments/payments")
+      setPayments(response.data)
+    } catch (error) {
+      console.error('Error fetching payments:', error)
+    } finally {
+
+    }
+  }
+
+  const fetchTenants = async () => {
+    try {
+      const response = await get(`/tenants`)
+      setTenants(response.data)
+    } catch (err) {
+      console.log('Error fetching tenants. Please try again later.')
+    } finally {
+    }
+  }
+
+  const fetchProperties = async () => {
+    //setIsLoading(true)
+    try {
+      const response = await get('/properties')
+      setProperties(response.data)
+    } catch (error) {
+      console.error('Error fetching properties:', error)
+    } finally {
+      //setIsLoading(false)
+    }
+  }
+
+  const handleAddPayment = async (e: React.FormEvent) => {
     e.preventDefault()
-    const id = payments.length + 1
-    const newPaymentWithId = { ...newPayment, id, amount: parseFloat(newPayment.amount) }
-    setPayments([...payments, newPaymentWithId])
-    setNewPayment({ tenant: '', property: '', amount: '', date: '', status: 'Pending' })
+    console.log(":: newPayment ::", newPayment)
+    await post('/payments/payments', newPayment)
+    fetchPayments()
+    setNewPayment({ tenant_id: '', property_id: '', payment_method: '', amount: '', date: '', status: 'Paid' })
     setIsDialogOpen(false)
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
     
+      <nav className="bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 justify-between">
+            <div className="flex">
+              <div className="flex flex-shrink-0 items-center">
+                <span className="text-2xl font-bold text-gray-800">Bava Rentals</span>
+              </div>
+              <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
+                <Link href="/dashboard" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Dashboard
+                </Link>
+                <Link href="/properties" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Properties
+                </Link>
+                <Link href="/tenants" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Tenants
+                </Link>
+                <Link href="/payments" className="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Payments
+                </Link>
+                <Link href="/reports" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                  Reports
+                </Link>
+              </div>
+            </div>
+            <div className="hidden sm:ml-6 sm:flex sm:items-center">
+              <Button variant="ghost">
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">View notifications</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
 
       <main className="py-10">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -79,26 +179,49 @@ export default function Payments() {
                 <form onSubmit={handleAddPayment}>
                   <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="tenant" className="text-right">
-                        Tenant
-                      </Label>
-                      <Input
-                        id="tenant"
-                        value={newPayment.tenant}
-                        onChange={(e) => setNewPayment({...newPayment, tenant: e.target.value})}
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="property" className="text-right">
+                      <Label htmlFor="type" className="text-right">
                         Property
                       </Label>
-                      <Input
-                        id="property"
-                        value={newPayment.property}
-                        onChange={(e) => setNewPayment({...newPayment, property: e.target.value})}
-                        className="col-span-3"
-                      />
+                      <Select
+                        value={newPayment.property_id}
+                        onValueChange={(value) => {
+                          setNewPayment({...newPayment, property_id: value})
+                        }}
+                      >
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {
+                            properties.map((property) => (
+                              <SelectItem value={String(property.id)}>{property.name}</SelectItem>
+                            ))
+                          }
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="type" className="text-right">
+                        Tenant
+                      </Label>
+                      <Select
+                        value={newPayment.tenant_id}
+                        onValueChange={(value) => {
+                          setNewPayment({...newPayment, tenant_id: value})
+                        }}
+                      >
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {
+                            tenants.map((tenant) => (
+                              <SelectItem value={String(tenant.id)}>{tenant.name}</SelectItem>
+                            ))
+                          }
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="amount" className="text-right">
@@ -111,6 +234,28 @@ export default function Payments() {
                         onChange={(e) => setNewPayment({...newPayment, amount: e.target.value})}
                         className="col-span-3"
                       />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="type" className="text-right">
+                        Payment Method
+                      </Label>
+                      <Select
+                        value={newPayment.payment_method}
+                        onValueChange={(value) => {
+                          setNewPayment({...newPayment, payment_method: value})
+                        }}
+                      >
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {
+                            paymentMethod.map((payM) => (
+                              <SelectItem value={payM.key}>{payM.value}</SelectItem>
+                            ))
+                          }
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="date" className="text-right">
@@ -165,22 +310,16 @@ export default function Payments() {
                     <TableHead>Amount</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredPayments.map((payment) => (
+                  {payments.map((payment) => (
                     <TableRow key={payment.id}>
-                      <TableCell className="font-medium">{payment.tenant}</TableCell>
-                      <TableCell>{payment.property}</TableCell>
-                      <TableCell>${payment.amount}</TableCell>
+                      <TableCell className="font-medium">{payment.tenant_id}</TableCell>
+                      <TableCell>{payment.property_id}</TableCell>
+                      <TableCell>{payment.amount}</TableCell>
                       <TableCell>{payment.date}</TableCell>
                       <TableCell>{payment.status}</TableCell>
-                      <TableCell>
-                        <Button variant="outline" size="sm">
-                          View Details
-                        </Button>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

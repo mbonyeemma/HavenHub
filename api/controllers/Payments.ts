@@ -22,6 +22,7 @@ router.delete('/payments/:id', applyJWTConditionally, deletePayment);
  */
 async function addPayment(req: Request, res: Response): Promise<void> {
   try {
+    console.log(":: req.body ::", req.body)
     const result = await admin.insertData('payments', req.body);
     res.status(201).json({ message: 'Payment added successfully', data: result });
   } catch (error) {
@@ -47,7 +48,7 @@ async function getAllPayments(req: Request, res: Response): Promise<void> {
 async function getPaymentById(req: Request, res: Response): Promise<void> {
   try {
     const paymentId = parseInt(req.params.id, 10);
-    const payment = await admin.selectDataById('payments', paymentId);
+    const payment = await admin.selectData('payments', `id=${paymentId}`);
 
     if (!payment) {
       res.status(404).json({ message: 'Payment not found' });
@@ -66,7 +67,7 @@ async function getPaymentById(req: Request, res: Response): Promise<void> {
 async function updatePayment(req: Request, res: Response): Promise<void> {
   try {
     const paymentId = parseInt(req.params.id, 10);
-    const result = await admin.updateData('payments', paymentId, req.body);
+    const result = await admin.updateData('payments', `id=${paymentId}`, req.body);
 
     if (!result) {
       res.status(404).json({ message: 'Payment not found' });
@@ -85,7 +86,7 @@ async function updatePayment(req: Request, res: Response): Promise<void> {
 async function deletePayment(req: Request, res: Response): Promise<void> {
   try {
     const paymentId = parseInt(req.params.id, 10);
-    const result = await admin.deleteData('payments', paymentId);
+    const result = await admin.deleteData('payments', `id=${paymentId}`);
 
     if (!result) {
       res.status(404).json({ message: 'Payment not found' });
